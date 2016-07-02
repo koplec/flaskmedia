@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<h2>{{ user.name}} </h2>
+
+<div>
+    <ul>
+        <li><a href="{{ url_for('user_edit', user_id=user.id) }}">Edit</a></li>
+        <li><a id="user-delete-link" href="#" data-delete-url="{{ url_for('user_delete', user_id=user.id)}}">Delete</a></li>
+    </ul>
+</div>
+
+<script>
+var link = document.getElementById('user-delete-link')
+link.addEventListener('click', function(event){
+    var delete_url = link.dataset.deleteUrl;
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function(){
+        if (req.readyState == 4){ //通信完了時 //readystate==1 -> 読み込み中
+            if(req.status == 200){//通信成功時
+                window.location = '{{url_for('user_list')}}'
+            }else{
+                alert('Delete failed')
+            }
+        }
+    }
+    req.open('POST', delete_url );
+    req.send(null);//実際にデータをやり取りする
+})
+</script>
+
+{% endblock %}

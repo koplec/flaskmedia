@@ -1,0 +1,29 @@
+{% extends 'media/layout.html' %}
+{% block head %}
+{{ super() }}
+<script type="text/javascript">
+$(document).ready(function(){
+	var mv = document.getElementById("mv");
+	var speed_input = document.getElementById("speed-input");
+	speed_input.addEventListener("change", function(event){
+		mv.playbackRate = speed_input.value
+	});
+});
+</script>
+{% endblock %}
+{% block body %}
+{{ super() }}
+<video controls id="mv" width="640">
+	<source src="{{url_for('video_src', media_id=media.id)}}" type="video/mp4">
+  <!--  --> 
+  I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+  <!-- 古いブラウザで mp4 ビデオを再生するために、Flash プレイヤーを埋め込むことができます -->
+  <!-- 再生速度 mv.playbackRate = 1.0 -->
+  <!-- 移動 mv.currentTime = 10 ファイルサイズが大きい場合先読みは厳しい？-->
+  <!-- chromeでは、range tag?がないと早送りができない？ -->
+</video>
+<div id="control-panel">
+	<span>speed:</span><input type="number" value="1.0" max="4.0" min="0.0" step="0.1" id="speed-input">
+</div>
+
+{% endblock %}

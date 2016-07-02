@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+{% block head %}
+<script type="text/javascript">
+$(document).ready(function(){
+	var preventEventTypes = ["dragenter", "dragover"];
+	preventEventTypes.forEach(function(eventType){
+		$("#drop_area").on(eventType, function(e){
+			e.stopPropagation();
+			e.preventDefault();
+		});
+	})
+	$("#drop_area").on("drop", function(_e){
+        var e = _e;
+        if( _e.originalEvent ){
+            e = _e.originalEvent;
+        }
+        e.stopPropagation();
+        e.preventDefault();
+
+        var dt = e.dataTransfer;
+        var files = dt.files;
+    });
+});
+
+</script>
+{% endblock %}
+{% block body %}
+<h2>Upload</h2>
+<div id="upload_section">
+    <div id="drop_area" style="width:700px; height:150px; padding:10px; border:3px solid">
+        ファイルをドラッグアンドドロップしてください。複数ファイル同時も対応しています。
+    </div>
+</div>
+
+<h2>Upload multiple files using html5 multiple</h2>
+<form action="{{ url_for('upload_media') }}" method="POST" enctype="multipart/form-data">
+	<dl>
+		<dt>File:</dt>
+		<dd><input type="file" name="file[]" multiple></dd>
+		<dd><input type="submit" name="upload"></dd>
+	</dl>
+</form>
+
+<h2>List</h2>
+<form action="" method="POST">
+	<input type="text" value="" name="query" />
+	<input type="submit" value="Search" />
+</form>
+<ul>
+{% for media in medias %}
+<li>
+	{{media.name}}
+	<a href="{{ url_for('play_media', media_id=media.id)}}">Play</a>
+	<a href="{{ url_for('stream_media', media_id=media.id)}}">Stream</a>
+	<a href="{{ url_for('download_media', media_id=media.id)}}">Download</a>
+	<a href="{{ url_for('delete_media', media_id=media.id)}}"> Delete </a>
+</li>
+{% else %}
+<li>No media</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

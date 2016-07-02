@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset='utf-8'>
+		<title>Flaskmedia</title>
+		<script type="text/javascript" src="{{url_for('static', filename='js/jquery-3.0.0.js')}}"></script>
+		{% block head %}
+		{% endblock %}
+	</head>
+	<body>
+		<div class=page>
+			<h1>Flask Media</h1>
+			{% if session.user_id %}
+				<a href="{{url_for('logout')}}">Logout</a>
+				<a href="{{url_for('media')}}">media</a>
+				<a href="{{url_for('user_list')}}">users</a>
+			{% else %}
+				<a href="{{ url_for('login')}}">Login</a>
+			{% endif %}
+
+			{% for message in get_flashed_messages() %}
+				<div class=flash>{{ message }}</div>
+			{% endfor %}
+			{% block body %}
+			{% endblock %}
+		</div>
+	</body>
+</html>
