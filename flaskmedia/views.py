@@ -18,7 +18,7 @@ def login():
         user, authenticated = User.authenticate(db.session.query, request.form['name'], request.form['password'])
         if authenticated:
             session['user_id'] = user.id
-            flash('You were logged in')
+            session['user_name'] = user.name
             return redirect(url_for('media'))
         else:
             flash('Invalid inputs')
@@ -27,6 +27,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
+    session.pop('user_name', None)
     flash('You were logged out')
     return redirect(url_for('login'))
 
@@ -44,6 +45,12 @@ def media():
         medias = Media.query.filter_by(user_id=session['user_id'])
     return render_template('media/list.html', medias=medias)
 
+@app.route('/media/<int:media_id>/edit')
+def edit_media(media_id):
+    media = Media.query.filter_by(id=media_id).first()
+    if media is None or media.user_id != session['user_id']:
+        return abort(500)
+    return render_template('media/edit.html', media=media)
 
 @app.route('/media/<int:media_id>/play')
 def play_media(media_id):
@@ -66,8 +73,9 @@ def stream_media(media_id):
 def update_media(media_id):
     media = Media.query.filter_by(id=media_id).first()
     media.name = request.form['name']
-    print(request.form['registration_date_local_str'])
-    media.registration_date = datetime.strptime(request.form['registration_date_local_str'],"%Y-%m-%dT%H:%M:%S")
+    registration_date_local_str = request.form['registration_date_local_str']
+    print(registration_date_local_str)
+    media.registration_date = datetime.strptime(request.form['registration_date_local_str'],"%Y-%m-%dT%H:%M")
     db.session.add(media)
     db.session.commit()
 

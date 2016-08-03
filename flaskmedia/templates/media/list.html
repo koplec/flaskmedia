@@ -2,14 +2,17 @@
 {% block head %}
 <script type="text/javascript">
 $(document).ready(function(){
+
+	//ファイルアップロード
 	var preventEventTypes = ["dragenter", "dragover"];
 	preventEventTypes.forEach(function(eventType){
-		$("#drop_area").on(eventType, function(e){
+		$("#upload_section .drop_area").on(eventType, function(e){
 			e.stopPropagation();
 			e.preventDefault();
 		});
 	})
-	$("#drop_area").on("drop", function(_e){
+	var uploadFiles = null;
+	$("#upload_section .drop_area").on("drop", function(_e){
         var e = _e;
         if( _e.originalEvent ){
             e = _e.originalEvent;
@@ -19,18 +22,71 @@ $(document).ready(function(){
 
         var dt = e.dataTransfer;
         var files = dt.files;
+		uploadFiles = files
+		var status = $("#upload_status .message");
+		status.html("upload files: " + files.length + "<br>");
     });
+	$("#upload_section .begin_upload").on("click", function(e){
+		if(uploadFiles != null){
+			var uploadingProcesses = [];
+			for(var i=0; i<uploadFiles.length; i++){
+				var proc = (function(i){
+					var uploadFile = uploadFiles.item(i);
+					//ajax
+					var formData = new FormData();
+					formData.append('file', uploadFile);
+					return function(){
+						$("#upload_section .message").append(uploadFile.name + ":BEGIN" + "<br>");		
+						return $.ajax({
+							type: 'POST',
+							contentType: false,
+							//processDataオプションをfalseに設定することでデータが文字列に自動変換されるのを避けることが出来ます。
+							processData: false,
+							url: "{{ url_for('api_upload_media') }}",
+							data: formData,
+							dataType: 'json',
+							success: function(data) {
+								console.log(data);
+								$("#upload_section .message").append(uploadFile.name + ":" + data.result + "<br>");
+								//$("#upload_section .message").append("remaining : " + (uploadFiles.length - 1 - i)+ "<br>"); 						
+							}
+						});
+					}
+				})(i);
+				uploadingProcesses.push(proc);
+			}
+			//run
+			var defer = $.Deferred();
+			uploadingProcesses.forEach(function(proc){
+				defer.then(proc);
+			});
+			defer.done(function(){
+				$("#upload_section .message").append("Finished")
+			})
+			defer.resolve();
+		}
+	})
+
 });
 
 </script>
 {% endblock %}
 {% block body %}
-<h2>Upload</h2>
 <div id="upload_section">
-    <div id="drop_area" style="width:700px; height:150px; padding:10px; border:3px solid">
+	<h2>Upload</h2>
+    <div class="drop_area" style="width:700px; height:150px; padding:10px; border:3px solid">
         ファイルをドラッグアンドドロップしてください。複数ファイル同時も対応しています。
     </div>
+	<div id="upload_status">
+		<span>Status</span>
+		<div class="message"></div>
+	</div>
+	<div>
+		<button class="begin_upload">Begin</button>
+	</div>
+
 </div>
+
 
 <h2>Upload multiple files using html5 multiple</h2>
 <form action="{{ url_for('upload_media') }}" method="POST" enctype="multipart/form-data">
@@ -46,18 +102,30 @@ $(document).ready(function(){
 	<input type="text" value="" name="query" />
 	<input type="submit" value="Search" />
 </form>
-<ul>
-{% for media in medias %}
-<li>
-	{{media.name}}
-	<a href="{{ url_for('play_media', media_id=media.id)}}">Play</a>
-	<a href="{{ url_for('stream_media', media_id=media.id)}}">Stream</a>
-	<a href="{{ url_for('download_media', media_id=media.id)}}">Download</a>
-	<a href="{{ url_for('delete_media', media_id=media.id)}}"> Delete </a>
-</li>
-{% else %}
-<li>No media</li>
-{% endfor %}
-</ul>
+<table>
+	<thead>
+		<tr>
+			<th>Media ID</th>
+			<th>Name</th>
+			<th>Date</th>
+			<th>Menu</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for media in medias %}
+		<tr>
+			<td>{{media.id}}</td>
+			<td>{{media.name}}</td>
+			<td>{{media.registration_date.strftime("%Y-%m-%d %H:%M")}}</td>
+			<td>
+				<a href="{{ url_for('edit_media', media_id=media.id) }}"> Edit </a>
+				<a href="{{ url_for('play_media', media_id=media.id)}}">Play</a>
+				<a href="{{ url_for('stream_media', media_id=media.id)}}">Stream</a>
+				<a href="{{ url_for('download_media', media_id=media.id)}}">Download</a>
+			</td>
+		{% endfor %}
+	</tbody>
+</table>
+
 
 {% endblock %}

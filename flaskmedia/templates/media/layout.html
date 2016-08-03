@@ -4,23 +4,5 @@
 {% endblock %}
 {% block body %}
 <h3>{{ media.name }}</h3>
-<form action="{{url_for('update_media', media_id=media.id)}}"  method="POST" >
-	<dl>
-		<dt>ID</dt>
-		<dd>{{media.id}}</dd>
-		<dt>TYPE_ID</dt>
-		<dd>{{media.type_id}}</dd>
-		<dt>name</dt>
-		<dd><input type="text" value="{{media.name}}" name="name" size="300" /></dd>
-		<dt>original name</dt>
-		<dd>{{media.original_name}}</dd>
-		<dt>file name</dt>
-		<dd>{{media.file_name}}</dd>
-		<dt>folder_path</dt>
-		<dd>{{media.folder_path}}</dd>
-		<dt>registration_date</dt>
-		<dd><input type="datetime-local" value="{{media.registration_date.strftime("%Y-%m-%dT%H:%M:%S")}}" name="registration_date_local_str" /></dd>
-	</dl>
-	<input type="submit" value="Update" />
-</form>
+
 {% endblock %}

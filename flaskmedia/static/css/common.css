@@ -1,0 +1,22 @@
+.ctrl {
+    color : blue;
+    cursor: pointer;
+}
+
+.flash{
+    border: 1px solid #448609;
+    padding: 5px;
+    background: #e2fbbd;
+}
+
+
+.header{
+    border-bottom: solid 1px #dcdcdc;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 1rem 0;
+}
+
+.menu{
+    float: right;
+}
